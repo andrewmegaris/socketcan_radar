@@ -18,6 +18,7 @@ class Radar
     bool get_scan();
     Target* targetArray;
     int numTargets;
+    void print_scan_info();
 
   private:
 

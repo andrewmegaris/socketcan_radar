@@ -6,9 +6,7 @@ int main(int argc, char **argv)
 {
 
    Radar my_radar_test;
-   my_radar_test.targetArray[5].set_snr(7.7);
-
-   std::cout << my_radar_test.targetArray[5].get_snr() << std::endl;
+   my_radar_test.print_scan_info();
 
    return 0	;
 

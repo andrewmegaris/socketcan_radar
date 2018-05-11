@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <signal.h>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,6 +21,7 @@
 Radar::Radar()
 {
   targetArray = new Target[MAX_TARGETS];
+  numTargets  = 0;
 }
 
 Radar::~Radar()
@@ -145,10 +147,21 @@ bool Radar::get_scan()
 
   }
 
-
   return ret;
 }
 
+void Radar::print_scan_info()
+{
+  std::cout << "Number of Targets in radar: " << numTargets << std::endl;
+  for(int x = 0; x < numTargets; x++)
+  {
+    std::cout << "Id: " << targetArray[x].get_id() << ", ";
+    std::cout << "Range: " << targetArray[x].get_range() << ", ";
+    std::cout << "Velocity: " << targetArray[x].get_velocity() << std::endl;
+    std::cout << "Azimuth Angle: " << targetArray[x].get_az() << ", ";
+    std::cout << "SNR: " << targetArray[x].get_snr() << std::endl;
+  }
+}
 
 
 
