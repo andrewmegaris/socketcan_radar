@@ -1,14 +1,21 @@
+#include <errno.h>
+#include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
+
 #include <fcntl.h>
-#include <sys/ioctl.h>
+#include <unistd.h>
 #include <net/if.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/ioctl.h>
+
 #include <linux/can.h>
 #include <linux/can/raw.h>
 
 #include "target.cpp"
 #include "radar.hpp"
-
 
 Radar::Radar()
 {
@@ -17,7 +24,7 @@ Radar::Radar()
 
 Radar::~Radar()
 {
-
+  delete[] targetArray;
 }
 
 //do all the socketcan configuration here
@@ -51,22 +58,23 @@ bool Radar::activate()
 
   //format frame to the start command!
   //this is standard frame format
-  //TODO program the start command and other required information.
-  frame.can_id = 0x123;
+  frame.can_id = 0x100;
   frame.can_dlc = 8;
-  frame.data[0] = 0x00;
+  frame.data[0] = 0x01;
   frame.data[1] = 0x00;
-  frame.data[2] = 0x00;
-  frame.data[3] = 0x00;
-  frame.data[4] = 0x00;
-  frame.data[5] = 0x00;
-  frame.data[6] = 0x00;
-  frame.data[7] = 0x00;
+  frame.data[2] = 0xff;
+  frame.data[3] = 0xff;
+  frame.data[4] = 0xff;
+  frame.data[5] = 0xff;
+  frame.data[6] = 0xff;
+  frame.data[7] = 0xff;
 
- // nbytes = write(s, &frame, sizeof(struct can_frame));
+  nbytes = write(s, &frame, sizeof(struct can_frame));
   
   return ret;
 }
+
+//TODO Add functions for switching the mode and or output type(raw detection vs target tracking..)
 
 //look for a header ID, then parse all targets until you see footer ID
 bool Radar::get_scan()
@@ -85,7 +93,7 @@ bool Radar::get_scan()
     struct can_frame frame;
 
     //TODO abstract frame ID
-    // nbytes = ::read(s, &frame, sizeof(struct can_frame));
+    nbytes = ::read(s, &frame, sizeof(struct can_frame));
 
     //make sure frame is something
     if(nbytes < 0)
@@ -140,13 +148,6 @@ bool Radar::get_scan()
 
   return ret;
 }
-
-
-
-
-
-
-
 
 
 
