@@ -110,30 +110,30 @@ bool Radar::get_scan()
     //frame is safe to parse
     else
     {
-      //header
+      //can frame ID is header ID
       if(frame.can_id == HEADER_ID)
       {
         headerFound = true;
         //TODO process header frame
         //TODO get # of targets for a comparing in footer
       }
-      //footer
+      //can frame ID is footer ID and header has been processed
       else if(frame.can_id == FOOTER_ID && headerFound)
       {
         //TODO anything useful in footer?
         footerFound = true;
         numTargets = targetCount;
       }
-      //target range
-      else if(frame.can_id >= TARGET_RANGE_MIN && frame.can_id <= TARGET_RANGE_MAX && headerFound)
+      //can frame ID is in the target range and header has been processed.
+      else if( (frame.can_id >= TARGET_RANGE_MIN) && (frame.can_id <= TARGET_RANGE_MAX) && (headerFound) )
       {
-        //TODO parse the CAN frame
-        //TODO get parsing from previous radar driver.
-        float range = 0;
-        float az = 0;
-        float vel = 0;
-        float snr = 0;
-        targetArray[targetCount].set_id(targetCount);
+        //processing can frame into radar target object.
+        float range = (int16_t)( (frame.data[2] << 8) + frame.data[3]) / 100.0;
+        float az = (int16_t)( (frame.data[6] << 8) + frame.data[7]) / 100.0 * -1;
+        float vel = (int16_t)( (frame.data[4] << 8) + frame.data[5]) / 100.0;
+        float snr = frame.data[1];
+        int id = frame.data[0]; 
+        targetArray[targetCount].set_id(id);
         targetArray[targetCount].set_range(range);
         targetArray[targetCount].set_az(az);
         targetArray[targetCount].set_velocity(vel);

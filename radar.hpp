@@ -1,11 +1,11 @@
 #ifndef RADAR_H
 #define RADAR_H
 
-const int MAX_TARGETS = 100;
-const int HEADER_ID = 1;
-const int FOOTER_ID = 1;
-const int TARGET_RANGE_MIN = 1;
-const int TARGET_RANGE_MAX = 1;
+const int MAX_TARGETS = 65;
+const int HEADER_ID = 1152;
+const int FOOTER_ID = 1153;
+const int TARGET_RANGE_MIN = 1024;
+const int TARGET_RANGE_MAX = 1084;
 
 class Radar
 {
