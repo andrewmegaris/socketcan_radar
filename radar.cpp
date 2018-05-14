@@ -1,4 +1,5 @@
 #include <errno.h>
+#include <string.h>
 #include <signal.h>
 #include <iostream>
 #include <stdio.h>
@@ -36,16 +37,28 @@ bool Radar::config_radar()
   bool ret = true;
   int nbytes;
   //open the socket
-  s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-
+  if((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
+  {
+    std::cout << "socket failed" << std::endl;
+    return -1;
+  }
+  
   //determine interface index
   strcpy(ifr.ifr_name, "can0");
-  ioctl(s, SIOCGIFINDEX, &ifr);
+  if (ioctl(s, SIOCGIFINDEX, &ifr) < 0)
+  {
+    std::cout << "ioctl failed" << std::endl;
+  }
   
   //assign interface index
   addr.can_family  = AF_CAN;
   addr.can_ifindex = ifr.ifr_ifindex;
 
+  if(bind( s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+  {
+    std::cout << "bind failed" << std::endl;
+  }
+  std::cout << "index:" << ifr.ifr_ifindex;
   return ret;
 
 }
@@ -72,7 +85,10 @@ bool Radar::activate()
   frame.data[7] = 0xff;
 
   nbytes = write(s, &frame, sizeof(struct can_frame));
-  
+  std::cout << "bytes writen: " << nbytes << std::endl;
+
+  std::cout << "errno: " << errno<< std::endl;
+
   return ret;
 }
 
@@ -142,7 +158,10 @@ bool Radar::get_scan()
         targetArray[targetCount].set_snr(snr);
         targetCount++;
       }
-      //TODO we could add some check for unexpected CANIDS here.. 
+      else
+      {
+        std::cout << "unknown id" << std::endl;
+      }
     }
 
   }
