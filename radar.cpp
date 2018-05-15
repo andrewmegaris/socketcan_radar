@@ -1,5 +1,4 @@
 #include <errno.h>
-#include <string.h>
 #include <signal.h>
 #include <iostream>
 #include <stdio.h>
@@ -19,10 +18,11 @@
 #include "target.cpp"
 #include "radar.hpp"
 
-Radar::Radar()
+//TODO use init list
+Radar::Radar(std::string fw)
 {
-  targetArray = new Target[MAX_TARGETS];
-  numTargets  = 0;
+  radar_firmware = fw;
+  numTargets     = 0;
 }
 
 Radar::~Radar()
@@ -31,37 +31,17 @@ Radar::~Radar()
 }
 
 //do all the socketcan configuration here
-bool Radar::config_radar()
+bool Radar::init()
 {
-  //TODO implement  checking
-  bool ret = true;
-  int nbytes;
-  //open the socket
-  if((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
-  {
-    std::cout << "socket failed" << std::endl;
-    return -1;
-  }
-  
-  //determine interface index
-  strcpy(ifr.ifr_name, "can0");
-  if (ioctl(s, SIOCGIFINDEX, &ifr) < 0)
-  {
-    std::cout << "ioctl failed" << std::endl;
-  }
-  
-  //assign interface index
-  addr.can_family  = AF_CAN;
-  addr.can_ifindex = ifr.ifr_ifindex;
+  //TODO put in error info. socketcan still auto returns true.
+  bool init_okay = true;
 
-  if(bind( s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
-  {
-    std::cout << "bind failed" << std::endl;
-  }
-  std::cout << "index:" << ifr.ifr_ifindex;
-  return ret;
+  init_okay = check_firmware();
+  init_okay = config_socketcan();
 
+  return init_okay;
 }
+
 
 //send the starting command
 bool Radar::activate()
@@ -85,10 +65,7 @@ bool Radar::activate()
   frame.data[7] = 0xff;
 
   nbytes = write(s, &frame, sizeof(struct can_frame));
-  std::cout << "bytes writen: " << nbytes << std::endl;
-
-  std::cout << "errno: " << errno<< std::endl;
-
+  
   return ret;
 }
 
@@ -107,12 +84,11 @@ bool Radar::get_scan()
   while(footerFound == false)
   {
     //TODO check if we are doing standard can frames or extended
-    //TODO add option to do both ^^ this is more of a global scope TODO
     struct can_frame frame;
 
     //TODO abstract frame ID
-    nbytes = ::read(s, &frame, sizeof(struct can_frame));
-
+    nbytes = read(s, &frame, sizeof(struct can_frame));
+    
     //make sure frame is something
     if(nbytes < 0)
     {
@@ -125,25 +101,25 @@ bool Radar::get_scan()
       fprintf(stderr, "read error: incomplete frame\n");
       return false;
     }
-    //frame is safe to parse
+    //frame is 'safer' to parse
     else
     {
       //can frame ID is header ID
-      if(frame.can_id == HEADER_ID)
+      if(frame.can_id == (this -> header_id))
       {
         headerFound = true;
         //TODO process header frame
         //TODO get # of targets for a comparing in footer
       }
       //can frame ID is footer ID and header has been processed
-      else if(frame.can_id == FOOTER_ID && headerFound)
+      else if(frame.can_id == (this -> footer_id) && headerFound)
       {
         //TODO anything useful in footer?
         footerFound = true;
         numTargets = targetCount;
       }
       //can frame ID is in the target range and header has been processed.
-      else if( (frame.can_id >= TARGET_RANGE_MIN) && (frame.can_id <= TARGET_RANGE_MAX) && (headerFound) )
+      else if( (frame.can_id >= (this -> target_frame_min) ) && (frame.can_id <= (this -> target_frame_max) ) && (headerFound) )
       {
         //processing can frame into radar target object.
         float range = (int16_t)( (frame.data[2] << 8) + frame.data[3]) / 100.0;
@@ -158,10 +134,7 @@ bool Radar::get_scan()
         targetArray[targetCount].set_snr(snr);
         targetCount++;
       }
-      else
-      {
-        std::cout << "unknown id" << std::endl;
-      }
+      //TODO we could add some check for unexpected CANIDS here.. 
     }
 
   }
@@ -184,10 +157,63 @@ void Radar::print_scan_info()
 
 
 
+bool Radar::check_firmware()
+{
+  bool firmware_matched = false;
+
+  if(radar_firmware == "k77_default")
+  {
+    max_targets = 65;
+    header_id = 1086;
+    footer_id = 1087;
+    target_frame_min = 1024;
+    target_frame_max = 1084;
+    targetArray = new Target[max_targets];
+    firmware_matched = true;
+  }
+  else if(radar_firmware == "t79_short_range")
+  {
+    max_targets = 65;
+    header_id   = 1086;
+    footer_id   = 1087;
+    target_frame_min = 1024;
+    target_frame_max = 1084;
+    targetArray = new Target[max_targets];
+    firmware_matched = true;
+  }
+  else if(radar_firmware == "t79_bsd")
+  {
+    max_targets = 65;
+    header_id   = 1086;
+    footer_id   = 1087;
+    target_frame_min = 1024;
+    target_frame_max = 1084;
+    targetArray = new Target[max_targets];
+    firmware_matched = true;
+  }
+
+  return firmware_matched;
+}
 
 
+bool Radar::config_socketcan()
+{
+  //TODO implement  checking
+  bool ret = true;
+  int nbytes;
+  //open the socket
+  s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
 
+  //determine interface index
+  strcpy(ifr.ifr_name, "can0" );
+  ioctl(s, SIOCGIFINDEX, &ifr);
+  
+  //assign interface index
+  addr.can_family  = AF_CAN;
+  addr.can_ifindex = ifr.ifr_ifindex;
 
+  return true;
+}
 
 
 

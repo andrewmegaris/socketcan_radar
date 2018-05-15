@@ -1,31 +1,40 @@
 #ifndef RADAR_H
 #define RADAR_H
 
-const int MAX_TARGETS = 65;
-const int HEADER_ID = 1086;
-const int FOOTER_ID = 1087;
-const int TARGET_RANGE_MIN = 1024;
-const int TARGET_RANGE_MAX = 1084;
+//TODO add POSE struct for future multi radar set up.
 
 class Radar
 {
 
   public:
-    Radar();
+   
+     Radar(std::string);
     ~Radar();
-    bool config_radar();
+
+    bool init();
     bool activate();
     bool get_scan();
-    Target* targetArray;
-    int numTargets;
+    bool check_firmware();
+    bool config_socketcan();
+
+    int  numTargets;
+
     void print_scan_info();
+
+    Target* targetArray;
 
   private:
 
-  //socketCAN stuph this may or may not stay here
-    int s;
     struct sockaddr_can addr;
     struct ifreq ifr;
+
+    int s;
+    int max_targets;
+    int header_id;
+    int footer_id;
+    int target_frame_min;
+    int target_frame_max;
+    std::string radar_firmware;
   
 };
 
