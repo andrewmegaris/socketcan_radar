@@ -1,14 +1,14 @@
 #ifndef RADAR_H
 #define RADAR_H
 
-//TODO add POSE struct for future multi radar set up.
+
 
 class Radar
 {
 
   public:
    
-     Radar(std::string);
+     Radar(std::string,double,double,double);
     ~Radar();
 
     bool init();
@@ -28,6 +28,15 @@ class Radar
     struct sockaddr_can addr;
     struct ifreq ifr;
 
+    //pose center TBD
+    struct location
+    {
+      double x;
+      double y;
+      double theta;
+    };
+
+    location pose;
     int s;
     int max_targets;
     int header_id;

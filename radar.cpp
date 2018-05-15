@@ -19,10 +19,13 @@
 #include "radar.hpp"
 
 //TODO use init list
-Radar::Radar(std::string fw)
+Radar::Radar(std::string fw,double x_in, double y_in, double theta_in)
 {
   radar_firmware = fw;
   numTargets     = 0;
+  (this -> pose).x     = x_in;
+  (this -> pose).y     = y_in;
+  (this -> pose).theta = theta_in;
 }
 
 Radar::~Radar()
@@ -92,13 +95,13 @@ bool Radar::get_scan()
     //make sure frame is something
     if(nbytes < 0)
     {
-      perror("can raw socket read error");
+      std::cout << "can raw socket read error" << std::endl;
       return false;
     }
     //make sure frame is a frame
     else if(nbytes < sizeof(struct can_frame))
     {
-      fprintf(stderr, "read error: incomplete frame\n");
+      std::cout << "read error: incomplete frame" << std::endl;
       return false;
     }
     //frame is 'safer' to parse

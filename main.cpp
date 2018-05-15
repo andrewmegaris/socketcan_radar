@@ -5,7 +5,7 @@
 int main(int argc, char **argv)
 {
 
-  Radar my_radar_test("k77");
+  Radar my_radar_test("k77",0.0,0.0,0.0);
   std::cout << "radar created" << std::endl;
   my_radar_test.init();
   std::cout << "radar configured" << std::endl;
