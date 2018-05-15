@@ -198,21 +198,34 @@ bool Radar::check_firmware()
 
 bool Radar::config_socketcan()
 {
-  //TODO implement  checking
+ //TODO implement  checking
   bool ret = true;
   int nbytes;
   //open the socket
-  s = socket(PF_CAN, SOCK_RAW, CAN_RAW);
-
+  if((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
+  {
+    std::cout << "socket failed" << std::endl;
+    return -1;
+  }
+  
   //determine interface index
-  strcpy(ifr.ifr_name, "can0" );
-  ioctl(s, SIOCGIFINDEX, &ifr);
+  strcpy(ifr.ifr_name, "can0");
+  if (ioctl(s, SIOCGIFINDEX, &ifr) < 0)
+  {
+    std::cout << "ioctl failed" << std::endl;
+  }
   
   //assign interface index
   addr.can_family  = AF_CAN;
   addr.can_ifindex = ifr.ifr_ifindex;
 
-  return true;
+  if(bind( s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
+  {
+    std::cout << "bind failed" << std::endl;
+  }
+  std::cout << "index:" << ifr.ifr_ifindex;
+  return ret;
+
 }
 
 
