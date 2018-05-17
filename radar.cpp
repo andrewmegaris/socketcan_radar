@@ -70,6 +70,31 @@ bool Radar::activate()
   return ret;
 }
 
+bool Radar::deactivate()
+{
+  //TODO implement checking
+  bool ret = true;
+  int nbytes;
+  struct can_frame frame;
+
+  //format frame to the start command!
+  //this is standard frame format
+  frame.can_id = 0x100;
+  frame.can_dlc = 8;
+  frame.data[0] = 0x02;
+  frame.data[1] = 0x00;
+  frame.data[2] = 0xff;
+  frame.data[3] = 0xff;
+  frame.data[4] = 0xff;
+  frame.data[5] = 0xff;
+  frame.data[6] = 0xff;
+  frame.data[7] = 0xff;
+
+  nbytes = write(s, &frame, sizeof(struct can_frame));
+  std::cout << "bytes wroten: " << nbytes << std::endl;
+  return ret;
+}
+
 //TODO Add functions for switching the mode and or output type(raw detection vs target tracking..)
 
 //look for a header ID, then parse all targets until you see footer ID

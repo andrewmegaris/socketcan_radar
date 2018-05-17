@@ -13,6 +13,7 @@ class Radar
 
     bool init();
     bool activate();
+    bool deactivate();
     bool get_scan();
     bool check_firmware();
     bool config_socketcan();
