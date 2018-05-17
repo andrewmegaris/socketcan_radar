@@ -33,11 +33,9 @@ Radar::~Radar()
   delete[] targetArray;
 }
 
-//do all the socketcan configuration here
 bool Radar::init()
 {
-  //TODO put in error info. socketcan still auto returns true.
-  bool init_okay = true;
+  bool init_okay = false;
 
   init_okay = check_firmware();
   init_okay = config_socketcan();
@@ -68,7 +66,7 @@ bool Radar::activate()
   frame.data[7] = 0xff;
 
   nbytes = write(s, &frame, sizeof(struct can_frame));
-  
+  std::cout << "bytes wroten: " << nbytes << std::endl;
   return ret;
 }
 
@@ -77,7 +75,6 @@ bool Radar::activate()
 //look for a header ID, then parse all targets until you see footer ID
 bool Radar::get_scan()
 {
-  //TODO implement checking
   bool ret = true;
   bool footerFound = false;
   bool headerFound = false;
@@ -86,12 +83,9 @@ bool Radar::get_scan()
 
   while(footerFound == false)
   {
-    //TODO check if we are doing standard can frames or extended
-    struct can_frame frame;
 
-    //TODO abstract frame ID
+    struct can_frame frame;
     nbytes = read(s, &frame, sizeof(struct can_frame));
-    
     //make sure frame is something
     if(nbytes < 0)
     {
@@ -107,22 +101,21 @@ bool Radar::get_scan()
     //frame is 'safer' to parse
     else
     {
+      int frame_id = frame.can_id;
       //can frame ID is header ID
-      if(frame.can_id == (this -> header_id))
+      if(frame_id == (this -> header_id))
       {
         headerFound = true;
-        //TODO process header frame
-        //TODO get # of targets for a comparing in footer
+        //TODO get # of targets for comparing in footer
       }
       //can frame ID is footer ID and header has been processed
-      else if(frame.can_id == (this -> footer_id) && headerFound)
+      else if(frame_id == (this -> footer_id) && headerFound)
       {
-        //TODO anything useful in footer?
         footerFound = true;
         numTargets = targetCount;
       }
       //can frame ID is in the target range and header has been processed.
-      else if( (frame.can_id >= (this -> target_frame_min) ) && (frame.can_id <= (this -> target_frame_max) ) && (headerFound) )
+      else if( (frame_id >= (this -> target_frame_min) ) && (frame_id <= (this -> target_frame_max) ) && (headerFound) )
       {
         //processing can frame into radar target object.
         float range = (int16_t)( (frame.data[2] << 8) + frame.data[3]) / 100.0;
@@ -137,7 +130,7 @@ bool Radar::get_scan()
         targetArray[targetCount].set_snr(snr);
         targetCount++;
       }
-      //TODO we could add some check for unexpected CANIDS here.. 
+      //add more can frame id checks starting here. elifs
     }
 
   }
@@ -162,6 +155,7 @@ void Radar::print_scan_info()
 
 bool Radar::check_firmware()
 {
+//TODO put actual numbers in here
   bool firmware_matched = false;
 
   if(radar_firmware == "k77_default")
@@ -201,14 +195,11 @@ bool Radar::check_firmware()
 
 bool Radar::config_socketcan()
 {
- //TODO implement  checking
-  bool ret = true;
-  int nbytes;
   //open the socket
   if((s = socket(PF_CAN, SOCK_RAW, CAN_RAW)) < 0)
   {
     std::cout << "socket failed" << std::endl;
-    return -1;
+    return false;
   }
   
   //determine interface index
@@ -216,6 +207,7 @@ bool Radar::config_socketcan()
   if (ioctl(s, SIOCGIFINDEX, &ifr) < 0)
   {
     std::cout << "ioctl failed" << std::endl;
+    return false;
   }
   
   //assign interface index
@@ -225,9 +217,11 @@ bool Radar::config_socketcan()
   if(bind( s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
   {
     std::cout << "bind failed" << std::endl;
+    return false;
   }
-  std::cout << "index:" << ifr.ifr_ifindex;
-  return ret;
+
+  //if you made it here you're a success
+  return true;
 
 }
 
