@@ -18,10 +18,8 @@
 #include "target.cpp"
 #include "radar.hpp"
 
-//TODO use init list
-Radar::Radar(std::string fw,double x_in, double y_in, double theta_in)
+Radar::Radar(std::string fw,double x_in, double y_in, double theta_in):radar_firmware(fw)
 {
-  radar_firmware = fw;
   numTargets     = 0;
   (this -> pose).x     = x_in;
   (this -> pose).y     = y_in;
@@ -47,13 +45,11 @@ bool Radar::init()
 //send the starting command
 bool Radar::activate()
 {
-  //TODO implement checking
-  bool ret = true;
+
   int nbytes;
   struct can_frame frame;
 
   //format frame to the start command!
-  //this is standard frame format
   frame.can_id = 0x100;
   frame.can_dlc = 8;
   frame.data[0] = 0x01;
@@ -67,18 +63,17 @@ bool Radar::activate()
 
   nbytes = write(s, &frame, sizeof(struct can_frame));
   std::cout << "bytes wroten: " << nbytes << std::endl;
-  return ret;
+
+  //if you make it here you atleast wrote a full canframe to the BUS.
+  return true;
 }
 
 bool Radar::deactivate()
 {
-  //TODO implement checking
-  bool ret = true;
   int nbytes;
   struct can_frame frame;
 
-  //format frame to the start command!
-  //this is standard frame format
+  //format frame to the stop command!
   frame.can_id = 0x100;
   frame.can_dlc = 8;
   frame.data[0] = 0x02;
@@ -92,7 +87,9 @@ bool Radar::deactivate()
 
   nbytes = write(s, &frame, sizeof(struct can_frame));
   std::cout << "bytes wroten: " << nbytes << std::endl;
-  return ret;
+
+  //if you make it here you atleast wrote a full canframe to the BUS.
+  return true;
 }
 
 //TODO Add functions for switching the mode and or output type(raw detection vs target tracking..)
@@ -155,7 +152,7 @@ bool Radar::get_scan()
         targetArray[targetCount].set_snr(snr);
         targetCount++;
       }
-      //add more can frame id checks starting here. elifs
+      //add more can frame id checks starting here? elifs
     }
 
   }
@@ -175,8 +172,6 @@ void Radar::print_scan_info()
     std::cout << "SNR: " << targetArray[x].get_snr() << std::endl;
   }
 }
-
-
 
 bool Radar::check_firmware()
 {
@@ -203,16 +198,6 @@ bool Radar::check_firmware()
     targetArray = new Target[max_targets];
     firmware_matched = true;
   }
-  else if(radar_firmware == "t79_bsd")
-  {
-    max_targets = 65;
-    header_id   = 1086;
-    footer_id   = 1087;
-    target_frame_min = 1024;
-    target_frame_max = 1084;
-    targetArray = new Target[max_targets];
-    firmware_matched = true;
-  }
 
   return firmware_matched;
 }
@@ -228,7 +213,8 @@ bool Radar::config_socketcan()
   }
   
   //determine interface index
-  strcpy(ifr.ifr_name, "can0");
+  //TODO I couldnt 'simply' parameterize the canbus
+  strcpy(ifr.ifr_name, "can0");  
   if (ioctl(s, SIOCGIFINDEX, &ifr) < 0)
   {
     std::cout << "ioctl failed" << std::endl;
@@ -239,13 +225,14 @@ bool Radar::config_socketcan()
   addr.can_family  = AF_CAN;
   addr.can_ifindex = ifr.ifr_ifindex;
 
+  //bind the socket
   if(bind( s, (struct sockaddr *)&addr, sizeof(addr)) < 0)
   {
     std::cout << "bind failed" << std::endl;
     return false;
   }
 
-  //if you made it here you're a success
+  //if you make it here can config is success
   return true;
 
 }
