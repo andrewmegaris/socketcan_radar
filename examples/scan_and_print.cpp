@@ -8,9 +8,9 @@ int main(int argc, char **argv)
   Radar my_radar_test("k77",0.0,0.0,0.0);
   std::cout << "radar created" << std::endl;
   my_radar_test.init();
-  std::cout << "radar configured" << std::endl;
+  std::cout << "radar configure finished" << std::endl;
   my_radar_test.activate();
-  std::cout << "radar activated" << std::endl;
+  std::cout << "radar activate finished" << std::endl;
    
   for(int x = 0; x < 10; x++)
   {
