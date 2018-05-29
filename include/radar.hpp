@@ -15,8 +15,7 @@ class Radar
     bool activate();
     bool deactivate();
     bool get_scan();
-    bool check_firmware();
-    bool config_socketcan();
+
 
     int  numTargets;
 
@@ -25,6 +24,9 @@ class Radar
     Target* targetArray;
 
   private:
+
+    bool check_firmware();
+    bool config_socketcan();
 
     struct sockaddr_can addr;
     struct ifreq ifr;
