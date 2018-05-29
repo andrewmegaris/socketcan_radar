@@ -46,7 +46,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 
 Radar::Radar(std::string fw,double x_in, double y_in, double theta_in):radar_firmware(fw)
 {
-  numTargets     = 0;
+   numTargets          = 0;
   (this -> pose).x     = x_in;
   (this -> pose).y     = y_in;
   (this -> pose).theta = theta_in;
