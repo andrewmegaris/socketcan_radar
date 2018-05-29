@@ -1,9 +1,10 @@
 # SocketCAN Radar Driver
 
-## Download:
+## Info:
+  programs written using the (socketCAN protocol)[https://en.wikipedia.org/wiki/SocketCAN].  The default CAN BUS used is 'can0'.  The default bitrate of the hardware  and software is 500000.   
+
 
 ## Radar API:
-### Constructor & Destructor
 
 #### Radar(string fw,double x_in, double y_in, double theta_in)
 - fw:   String value with the version of firmware on your radar.
@@ -33,10 +34,14 @@ Print radar's internal target array to std::cout.  *note:  These targets could b
 Internal function called by 'init()'.  This will match the constructor's 'fw' parameter and configure radar object accordingly.  Returns true if successful.
 
 #### config_socketcan()
-Internal function called by 'init()'.  This will configure and bind the socket for CAN communication.  Returns true if successful.
+Internal function called by 'init()'.  This will configure, and bind the socket for CAN communication.  Returns true if successful.
 
 # Build and run examples
+Example applications will be compiled with the 'make' command.  Executables will be placed in the 'bin' folder.
 
+
+# TODO
+- make vehicle spacial reference diagram!
 
 
 
