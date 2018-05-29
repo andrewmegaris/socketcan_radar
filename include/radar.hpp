@@ -42,8 +42,10 @@ class Radar
     int max_targets;
     int header_id;
     int footer_id;
-    int target_frame_min;
-    int target_frame_max;
+    int target_raw_min;
+    int target_raw_max;
+    int target_tracked_min;
+    int target_tracked_max;
     std::string radar_firmware;
   
 };

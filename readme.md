@@ -28,7 +28,7 @@ Sends a CAN frame with the stop scanning command.  Returns true if CAN frame was
 Monitor the CAN BUS messages until a complete scan has been accumulated.  Data is stored in the radar's internal Target array.
 
 #### print_scan_info()
-Print radar's internal target array to std::cout.  *note:  These targets could be very stale depending on the last call of 'get_scan()'.
+Print radar's internal target array to std::cout.  *note:  These targets could be very stale depending on the last call of 'get_scan()'.*
 
 #### check_firmware()
 Internal function called by 'init()'.  This will match the constructor's 'fw' parameter and configure radar object accordingly.  Returns true if successful.
@@ -36,7 +36,7 @@ Internal function called by 'init()'.  This will match the constructor's 'fw' pa
 #### config_socketcan()
 Internal function called by 'init()'.  This will configure, and bind the socket for CAN communication.  Returns true if successful.
 
-# Build and run examples
+# Build and Run Examples:
 Example applications will be compiled with the 'make' command.  Executables will be placed in the 'bin' folder.
 
 

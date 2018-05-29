@@ -163,7 +163,9 @@ bool Radar::get_scan()
         numTargets = targetCount;
       }
       //can frame ID is in the target range and header has been processed.
-      else if( (frame_id >= (this -> target_frame_min) ) && (frame_id <= (this -> target_frame_max) ) && (headerFound) )
+      else if( (frame_id >= (this -> target_raw_min)  && frame_id <= (this -> target_raw_max) )         &&
+               ( frame_id >= (this -> target_tracked_min) && frame_id <= (this -> target_tracked_max) ) &&
+               (headerFound) )
       {
         //processing can frame into radar target object.
         float range = (int16_t)( (frame.data[2] << 8) + frame.data[3]) / 100.0;
@@ -209,18 +211,22 @@ bool Radar::check_firmware()
     max_targets = 65;
     header_id = 1086;
     footer_id = 1087;
-    target_frame_min = 1024;
-    target_frame_max = 1084;
+   target_raw_min = 1024;
+    target_raw_max = 1084;
+    target_tracked_min = 1024;
+    target_tracked_max = 1084;
     targetArray = new Target[max_targets];
     firmware_matched = true;
   }
   else if(radar_firmware == "t79_short_range")
   {
     max_targets = 65;
-    header_id   = 1086;
-    footer_id   = 1087;
-    target_frame_min = 1024;
-    target_frame_max = 1084;
+    header_id   = 1152;
+    footer_id   = 1153;
+    target_raw_min = 1024;
+    target_raw_max = 1151;
+    target_tracked_min = 1280;
+    target_tracked_max = 1380;
     targetArray = new Target[max_targets];
     firmware_matched = true;
   }
