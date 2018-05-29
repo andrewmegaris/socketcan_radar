@@ -16,7 +16,7 @@
 #include <linux/can/raw.h>
 
 #include "target.cpp"
-#include "radar.hpp"
+#include "../include/radar.hpp"
 
 Radar::Radar(std::string fw,double x_in, double y_in, double theta_in):radar_firmware(fw)
 {

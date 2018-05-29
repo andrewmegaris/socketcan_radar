@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "radar.cpp"
+#include "../src/radar.cpp"
 
 int main(int argc, char **argv)
 {
