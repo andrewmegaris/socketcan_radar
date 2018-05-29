@@ -1,8 +1,11 @@
 # SocketCAN Radar Driver
 
 ## Info:
-  programs written using the [socketCAN protocol](https://en.wikipedia.org/wiki/SocketCAN).  The default CAN BUS used is 'can0'.  The default bitrate of the hardware  and software is 500000.   
+- programs written using the [socketCAN protocol](https://en.wikipedia.org/wiki/SocketCAN).  The default CAN BUS used is 'can0', this is defined in 'Radar::config_socketcan()' in src/radar.cpp.
+- programs assume CAN BUS has been enabled.  You can do this manually by running the following commands in a terminal
 
+    sudo ip link set can0 type can bitrate 500000
+    sudo ip link set can0 up
 
 ## Radar API:
 
