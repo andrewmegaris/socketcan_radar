@@ -17,6 +17,8 @@ int main(int argc, char **argv)
     my_radar_test.get_scan();
     my_radar_test.print_scan_info();
   }
+  
+  my_radar_test.deactivate();
 
   return 0;
 }

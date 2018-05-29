@@ -163,7 +163,7 @@ bool Radar::get_scan()
         numTargets = targetCount;
       }
       //can frame ID is in the target range and header has been processed.
-      else if( (frame_id >= (this -> target_raw_min)  && frame_id <= (this -> target_raw_max) )         &&
+      else if( (frame_id >= (this -> target_raw_min)  && frame_id <= (this -> target_raw_max) )         ||
                ( frame_id >= (this -> target_tracked_min) && frame_id <= (this -> target_tracked_max) ) &&
                (headerFound) )
       {
