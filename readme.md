@@ -1,7 +1,7 @@
 # SocketCAN Radar Driver
 
 ## Info:
-  programs written using the (socketCAN protocol)[https://en.wikipedia.org/wiki/SocketCAN].  The default CAN BUS used is 'can0'.  The default bitrate of the hardware  and software is 500000.   
+  programs written using the [socketCAN protocol](https://en.wikipedia.org/wiki/SocketCAN).  The default CAN BUS used is 'can0'.  The default bitrate of the hardware  and software is 500000.   
 
 
 ## Radar API:
