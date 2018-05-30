@@ -1,5 +1,5 @@
 CC      := g++
-CFLAGS  := -c -Wall
+CFLAGS  := -c -Wall -std=c++11
 BIN     := bin
 SRC     := src
 INC     := include

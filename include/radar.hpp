@@ -49,7 +49,7 @@ class Radar
     int target_tracked_min;
     int target_tracked_max;
     std::string radar_firmware;
-  
+    std::chrono::system_clock::time_point scan_time;
 };
 
 

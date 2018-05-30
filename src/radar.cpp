@@ -30,7 +30,7 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <chrono>
 #include <fcntl.h>
 #include <unistd.h>
 #include <net/if.h>
@@ -160,11 +160,12 @@ bool Radar::get_scan()
       else if(frame_id == (this -> footer_id) && headerFound)
       {
         footerFound = true;
-        numTargets = targetCount;
+        numTargets  = targetCount;
+        scan_time   = std::chrono::system_clock::now();
       }
       //can frame ID is in the target range and header has been processed.
-      else if( (frame_id >= (this -> target_raw_min)  && frame_id <= (this -> target_raw_max) )         ||
-               ( frame_id >= (this -> target_tracked_min) && frame_id <= (this -> target_tracked_max) ) &&
+      else if( ((frame_id >= (this -> target_raw_min)  && frame_id <= (this -> target_raw_max) )         ||
+               ( frame_id >= (this -> target_tracked_min) && frame_id <= (this -> target_tracked_max) ) )&&
                (headerFound) )
       {
         //processing can frame into radar target object.
