@@ -30,7 +30,7 @@ Sends a CAN frame with the start scanning command.  This will have the radar con
 Sends a CAN frame with the stop scanning command.  Returns true if CAN frame was successfully written to the CAN BUS.
 
 #### get_scan()
-Monitor the CAN BUS messages until a complete scan has been accumulated.  Data is stored in the radar's internal Target array.
+Monitor the CAN BUS messages until a complete scan has been accumulated.  Data is stored in the radar's internal Target array. This function updates the timestamp when a 'footer frame' is processed.  The timestamp is based off of the system_clock.
 
 #### print_scan_info()
 Print radar's internal target array to std::cout.  *note:  These targets could be very stale depending on the last call of 'get_scan()'.*
