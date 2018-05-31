@@ -1,7 +1,7 @@
 #ifndef RADAR_H
 #define RADAR_H
 
-
+#define BUFLEN 2048
 
 class Radar
 {
@@ -28,6 +28,7 @@ class Radar
 
     bool check_firmware();
     bool config_socketcan();
+    bool config_udp_socket();
 
     struct sockaddr_can addr;
     struct ifreq ifr;
@@ -51,6 +52,11 @@ class Radar
     int target_tracked_max;
     std::string radar_firmware;
     std::chrono::system_clock::time_point scan_time;
+	
+    struct sockaddr_in myaddr, remaddr;
+    int fd, i, slen;
+    char* server;
+    char buf[BUFLEN];
 };
 
 

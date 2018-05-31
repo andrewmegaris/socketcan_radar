@@ -33,12 +33,15 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include <chrono>
 #include <fcntl.h>
 #include <unistd.h>
+#include <netdb.h>
 #include <net/if.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/ioctl.h>
-
+#include "../include/port.hpp"
 #include <linux/can.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <linux/can/raw.h>
 
 #include "target.cpp"
@@ -50,11 +53,14 @@ Radar::Radar(std::string fw,double x_in, double y_in, double theta_in):radar_fir
   (this -> pose).x     = x_in;
   (this -> pose).y     = y_in;
   (this -> pose).theta = theta_in;
+  slen                 = sizeof(remaddr);
+  this -> server       = "127.0.0.1";
 }
 
 Radar::~Radar()
 {
   delete[] targetArray;
+  close(fd);
 }
 
 bool Radar::init()
@@ -63,6 +69,7 @@ bool Radar::init()
 
   init_okay = check_firmware();
   init_okay = config_socketcan();
+  init_okay = config_udp_socket();
 
   return init_okay;
 }
@@ -238,6 +245,18 @@ bool Radar::get_scan()
 
 void Radar::print_scan_info()
 {
+
+
+
+  /* now let's send the messages */
+  for (i=0; i < 5; i++)
+  {
+    printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
+    sprintf(buf, "This is packet %d", i);
+    if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1)
+      perror("sendto");
+  }
+
   std::cout << "Number of Targets in radar: " << numTargets << std::endl;
   for(int x = 0; x < numTargets; x++)
   {
@@ -281,6 +300,41 @@ bool Radar::check_firmware()
   }
   */
   return firmware_matched;
+}
+
+bool Radar::config_udp_socket()
+{
+  /* create a socket */
+  if ((fd=socket(AF_INET, SOCK_DGRAM, 0))==-1)
+    printf("socket created\n");
+
+  /* bind it to all local addresses and pick any port number */
+  memset((char *)&myaddr, 0, sizeof(myaddr));
+  myaddr.sin_family = AF_INET;
+  myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
+  myaddr.sin_port = htons(0);
+  
+  if (bind(fd, (struct sockaddr *)&myaddr, sizeof(myaddr)) < 0) 
+  {
+    perror("bind failed");
+    return 0;
+  } 
+
+  /* now define remaddr, the address to whom we want to send messages */
+  /* For convenience, the host address is expressed as a numeric IP address */
+  /* that we will convert to a binary format via inet_aton */
+
+  memset((char *) &remaddr, 0, sizeof(remaddr));
+  remaddr.sin_family = AF_INET;
+  remaddr.sin_port = htons(SERVICE_PORT);
+  if (inet_aton(server, &remaddr.sin_addr)==0)
+  {
+    fprintf(stderr, "inet_aton() failed\n");
+    exit(1);
+  }
+
+
+return true;
 }
 
 
