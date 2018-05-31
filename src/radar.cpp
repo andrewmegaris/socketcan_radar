@@ -79,7 +79,7 @@ bool Radar::activate()
   frame.can_id  = 0x100;
   frame.can_dlc = 8;
   frame.data[0] = 0x01;
-  frame.data[1] = 0x00;
+  frame.data[1] = 0xff;
   frame.data[2] = 0xff;
   frame.data[3] = 0xff;
   frame.data[4] = 0xff;
@@ -103,7 +103,7 @@ bool Radar::deactivate()
   frame.can_id  = 0x100;
   frame.can_dlc = 8;
   frame.data[0] = 0x02;
-  frame.data[1] = 0x00;
+  frame.data[1] = 0xff;
   frame.data[2] = 0xff;
   frame.data[3] = 0xff;
   frame.data[4] = 0xff;
@@ -118,7 +118,54 @@ bool Radar::deactivate()
   return true;
 }
 
-//TODO Add functions for switching the mode and or output type(raw detection vs target tracking..)
+bool Radar::enable_wide_mode()
+{
+  int nbytes;
+  struct can_frame frame;
+
+  //format frame to the stop command!
+  frame.can_id  = 0x100;
+  frame.can_dlc = 8;
+  frame.data[0] = 0x04;
+  frame.data[1] = 0xff;
+  frame.data[2] = 0x00;
+  frame.data[3] = 0x0f;
+  frame.data[4] = 0x3f;
+  frame.data[5] = 0xff;
+  frame.data[6] = 0xff;
+  frame.data[7] = 0xff;
+
+  nbytes = write(s, &frame, sizeof(struct can_frame));
+  std::cout << "bytes wroten: " << nbytes << std::endl;
+
+  //if you make it here you atleast wrote a full canframe to the BUS.
+  return true;
+}
+bool Radar::enable_long_mode()
+{
+  int nbytes;
+  struct can_frame frame;
+
+  //format frame to the stop command!
+  frame.can_id  = 0x100;
+  frame.can_dlc = 8;
+  frame.data[0] = 0x04;
+  frame.data[1] = 0xff;
+  frame.data[2] = 0x00;
+  frame.data[3] = 0x0f;
+  frame.data[4] = 0x5f;
+  frame.data[5] = 0xff;
+  frame.data[6] = 0xff;
+  frame.data[7] = 0xff;
+
+  nbytes = write(s, &frame, sizeof(struct can_frame));
+  std::cout << "bytes wroten: " << nbytes << std::endl;
+
+  //if you make it here you atleast wrote a full canframe to the BUS.
+  return true;
+}
+
+
 
 //look for a header ID, then parse all targets until you see footer ID
 bool Radar::get_scan()
@@ -209,16 +256,17 @@ bool Radar::check_firmware()
 
   if(radar_firmware == "k77_default")
   {
-    max_targets = 65;
+    max_targets = 124;
     header_id = 1086;
     footer_id = 1087;
    target_raw_min = 1024;
-    target_raw_max = 1084;
-    target_tracked_min = 1024;
-    target_tracked_max = 1084;
+    target_raw_max = 1085;
+    target_tracked_min = 1280;
+    target_tracked_max = 1341;
     targetArray = new Target[max_targets];
     firmware_matched = true;
   }
+  /*
   else if(radar_firmware == "t79_short_range")
   {
     max_targets = 65;
@@ -231,7 +279,7 @@ bool Radar::check_firmware()
     targetArray = new Target[max_targets];
     firmware_matched = true;
   }
-
+  */
   return firmware_matched;
 }
 

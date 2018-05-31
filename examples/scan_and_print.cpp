@@ -11,7 +11,7 @@ int main(int argc, char **argv)
   std::cout << "radar configure finished" << std::endl;
   my_radar_test.activate();
   std::cout << "radar activate finished" << std::endl;
-   
+  my_radar_test.enable_wide_mode();
   for(int x = 0; x < 10; x++)
   {
     my_radar_test.get_scan();

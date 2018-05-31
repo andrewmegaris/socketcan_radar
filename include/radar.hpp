@@ -15,7 +15,8 @@ class Radar
     bool activate();
     bool deactivate();
     bool get_scan();
-
+    bool enable_wide_mode();
+    bool enable_long_mode();
 
     int  numTargets;
 
