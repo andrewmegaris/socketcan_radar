@@ -67,9 +67,9 @@ Radar::~Radar()
 bool Radar::init()
 {
 
-  if(check_firmware())
-    if(init_okay = config_socketcan())
-      if(init_okay = config_udp_socket())
+  if( check_firmware() )
+    if( config_socketcan() )
+      if( config_udp_socket() )
         return true;
       else
 	std::cout << "udp config error" << std::endl;
