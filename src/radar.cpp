@@ -50,11 +50,12 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 Radar::Radar(std::string fw,double x_in, double y_in, double theta_in):radar_firmware(fw)
 {
    numTargets          = 0;
+   slen                = sizeof(remaddr);
   (this -> pose).x     = x_in;
   (this -> pose).y     = y_in;
   (this -> pose).theta = theta_in;
-  slen                 = sizeof(remaddr);
-  this -> server       = "127.0.0.1";
+  (this -> server)     = "127.0.0.1";
+
 }
 
 Radar::~Radar()
@@ -65,13 +66,19 @@ Radar::~Radar()
 
 bool Radar::init()
 {
-  bool init_okay = false;
 
-  init_okay = check_firmware();
-  init_okay = config_socketcan();
-  init_okay = config_udp_socket();
+  if(check_firmware())
+    if(init_okay = config_socketcan())
+      if(init_okay = config_udp_socket())
+        return true;
+      else
+	std::cout << "udp config error" << std::endl;
+    else
+      std::cout << "socketCAN config error" << std::endl;
+  else
+    std::cout << "firmware mismatch" << std::endl;
 
-  return init_okay;
+  return false;
 }
 
 
