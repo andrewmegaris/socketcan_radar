@@ -71,12 +71,6 @@ bool Radar::init()
     if( config_socketcan() )
       if( config_udp_socket() )
         return true;
-      else
-	std::cout << "udp config error" << std::endl;
-    else
-      std::cout << "socketCAN config error" << std::endl;
-  else
-    std::cout << "firmware mismatch" << std::endl;
 
   return false;
 }
@@ -252,26 +246,34 @@ bool Radar::get_scan()
 
 void Radar::print_scan_info()
 {
-
-
-
-  /* now let's send the messages */
-  for (i=0; i < 5; i++)
-  {
-    printf("Sending packet %d to %s port %d\n", i, server, SERVICE_PORT);
-    sprintf(buf, "This is packet %d", i);
-    if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1)
-      perror("sendto");
-  }
+ 
+ float buffer_array[(5 * numTargets) + 1];
+ buffer_array[0] = numTargets;
 
   std::cout << "Number of Targets in radar: " << numTargets << std::endl;
+  
   for(int x = 0; x < numTargets; x++)
   {
+    int i = (5 * x);
+    buffer_array[i + 1] = targetArray[x].get_id();
+    buffer_array[i + 2] = targetArray[x].get_range();
+    buffer_array[i + 3] = targetArray[x].get_velocity();
+    buffer_array[i + 4] = targetArray[x].get_az();
+    buffer_array[i + 5] = targetArray[x].get_snr();
+
     std::cout << "Id: " << targetArray[x].get_id() << ", ";
     std::cout << "Range: " << targetArray[x].get_range() << ", ";
     std::cout << "Velocity: " << targetArray[x].get_velocity() << std::endl;
     std::cout << "Azimuth Angle: " << targetArray[x].get_az() << ", ";
     std::cout << "SNR: " << targetArray[x].get_snr() << std::endl;
+
+
+    printf("Sending packet %d to %s port %d\n", x, server, SERVICE_PORT);
+    sprintf(buf, "%f : %f", targetArray[x].get_id(),targetArray[x].get_range());
+    std::cout << "in the buf: " << buf << std::endl;
+
+    if (sendto(fd, buf, strlen(buf), 0, (struct sockaddr *)&remaddr, slen)==-1)
+      perror("sendto");
   }
 }
 
@@ -306,16 +308,21 @@ bool Radar::check_firmware()
     firmware_matched = true;
   }
   */
+  else
+  {
+    std::cout << "no firmware match" << std::endl;
+  }
+
   return firmware_matched;
 }
 
 bool Radar::config_udp_socket()
 {
-  /* create a socket */
-  if ((fd=socket(AF_INET, SOCK_DGRAM, 0))==-1)
+  // create a socket 
+  if ((fd = socket(AF_INET, SOCK_DGRAM, 0) ) == -1)
     printf("socket created\n");
 
-  /* bind it to all local addresses and pick any port number */
+  // bind it to all local addresses and pick any port number 
   memset((char *)&myaddr, 0, sizeof(myaddr));
   myaddr.sin_family = AF_INET;
   myaddr.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -327,21 +334,20 @@ bool Radar::config_udp_socket()
     return 0;
   } 
 
-  /* now define remaddr, the address to whom we want to send messages */
-  /* For convenience, the host address is expressed as a numeric IP address */
-  /* that we will convert to a binary format via inet_aton */
+  // now define remaddr and convert to binary
 
   memset((char *) &remaddr, 0, sizeof(remaddr));
   remaddr.sin_family = AF_INET;
   remaddr.sin_port = htons(SERVICE_PORT);
+
   if (inet_aton(server, &remaddr.sin_addr)==0)
   {
     fprintf(stderr, "inet_aton() failed\n");
     exit(1);
   }
 
-
-return true;
+  
+  return true;
 }
 
 

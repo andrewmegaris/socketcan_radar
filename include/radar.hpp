@@ -32,6 +32,7 @@ class Radar
 
     struct sockaddr_can addr;
     struct ifreq ifr;
+    struct sockaddr_in myaddr, remaddr;
 
     //pose center TBD
     struct location
@@ -41,7 +42,9 @@ class Radar
       double theta;
     };
 
+
     location pose;
+    int fd, i, slen;
     int s;
     int max_targets;
     int header_id;
@@ -53,8 +56,8 @@ class Radar
     std::string radar_firmware;
     std::chrono::system_clock::time_point scan_time;
 	
-    struct sockaddr_in myaddr, remaddr;
-    int fd, i, slen;
+
+
     char* server;
     char buf[BUFLEN];
 };
