@@ -17,6 +17,7 @@ class Radar
     bool get_scan();
     bool enable_wide_mode();
     bool enable_long_mode();
+    bool send_command(can_frame);
 
     int  numTargets;
 

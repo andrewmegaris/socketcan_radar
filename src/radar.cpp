@@ -47,6 +47,55 @@ OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMA
 #include "target.cpp"
 #include "../include/radar.hpp"
 
+namespace{
+  constexpr can_frame startCmd =   {.can_id  = 0x100,
+  .can_dlc = 8,
+  .data[0] = 0x01,
+  .data[1] = 0xff,
+  .data[2] = 0xff,
+  .data[3] = 0xff,
+  .data[4] = 0xff,
+  .data[5] = 0xff,
+  .data[6] = 0xff,
+  .data[7] = 0xff};
+  
+  constexpr can_frame stopCmd =   {.can_id  = 0x100,
+  .can_dlc = 8,
+  .data[0] = 0x02,
+  .data[1] = 0xff,
+  .data[2] = 0xff,
+  .data[3] = 0xff,
+  .data[4] = 0xff,
+  .data[5] = 0xff,
+  .data[6] = 0xff,
+  .data[7] = 0xff};
+  
+    constexpr can_frame wideModeCmd =   {.can_id  = 0x100,
+  .can_dlc = 8,
+  .data[0] = 0x04,
+  .data[1] = 0xff,
+  .data[2] = 0x00,
+  .data[3] = 0x0f,
+  .data[4] = 0x3f,
+  .data[5] = 0xff,
+  .data[6] = 0xff,
+  .data[7] = 0xff};
+    
+    constexpr can_frame longModeCmd =   {.can_id  = 0x100,
+  .can_dlc = 8,
+  .data[0] = 0x04,
+  .data[1] = 0xff,
+  .data[2] = 0x00,
+  .data[3] = 0x0f,
+  .data[4] = 0x5f,
+  .data[5] = 0xff,
+  .data[6] = 0xff,
+  .data[7] = 0xff};
+    
+ 
+  
+}
+
 Radar::Radar(std::string fw,double x_in, double y_in, double theta_in):radar_firmware(fw)
 {
    numTargets          = 0;
@@ -76,101 +125,37 @@ bool Radar::init()
 }
 
 
-//send the starting command
-bool Radar::activate()
-{
+bool Radar::send_command(can_frame& frame){
 
-  int nbytes;
-  struct can_frame frame;
-
-  //format frame to the start command!
-  frame.can_id  = 0x100;
-  frame.can_dlc = 8;
-  frame.data[0] = 0x01;
-  frame.data[1] = 0xff;
-  frame.data[2] = 0xff;
-  frame.data[3] = 0xff;
-  frame.data[4] = 0xff;
-  frame.data[5] = 0xff;
-  frame.data[6] = 0xff;
-  frame.data[7] = 0xff;
-
-  nbytes = write(s, &frame, sizeof(struct can_frame));
-  std::cout << "bytes wroten: " << nbytes << std::endl;
+  int nbytes = write(s, &frame, sizeof(struct can_frame));
+  std::cout << "bytes written: " << nbytes << std::endl;
+  if (nbytes < 0){
+      return false;
+  }
 
   //if you make it here you atleast wrote a full canframe to the BUS.
   return true;
+    
+}
+
+//send the starting command
+bool Radar::activate()
+{
+    return send_command(startCmd);
 }
 
 bool Radar::deactivate()
 {
-  int nbytes;
-  struct can_frame frame;
-
-  //format frame to the stop command!
-  frame.can_id  = 0x100;
-  frame.can_dlc = 8;
-  frame.data[0] = 0x02;
-  frame.data[1] = 0xff;
-  frame.data[2] = 0xff;
-  frame.data[3] = 0xff;
-  frame.data[4] = 0xff;
-  frame.data[5] = 0xff;
-  frame.data[6] = 0xff;
-  frame.data[7] = 0xff;
-
-  nbytes = write(s, &frame, sizeof(struct can_frame));
-  std::cout << "bytes wroten: " << nbytes << std::endl;
-
-  //if you make it here you atleast wrote a full canframe to the BUS.
-  return true;
+    return send_command(stopCmd);
 }
 
 bool Radar::enable_wide_mode()
 {
-  int nbytes;
-  struct can_frame frame;
-
-  //format frame to the stop command!
-  frame.can_id  = 0x100;
-  frame.can_dlc = 8;
-  frame.data[0] = 0x04;
-  frame.data[1] = 0xff;
-  frame.data[2] = 0x00;
-  frame.data[3] = 0x0f;
-  frame.data[4] = 0x3f;
-  frame.data[5] = 0xff;
-  frame.data[6] = 0xff;
-  frame.data[7] = 0xff;
-
-  nbytes = write(s, &frame, sizeof(struct can_frame));
-  std::cout << "bytes wroten: " << nbytes << std::endl;
-
-  //if you make it here you atleast wrote a full canframe to the BUS.
-  return true;
+    return send_command(wideModeCmd);
 }
 bool Radar::enable_long_mode()
 {
-  int nbytes;
-  struct can_frame frame;
-
-  //format frame to the stop command!
-  frame.can_id  = 0x100;
-  frame.can_dlc = 8;
-  frame.data[0] = 0x04;
-  frame.data[1] = 0xff;
-  frame.data[2] = 0x00;
-  frame.data[3] = 0x0f;
-  frame.data[4] = 0x5f;
-  frame.data[5] = 0xff;
-  frame.data[6] = 0xff;
-  frame.data[7] = 0xff;
-
-  nbytes = write(s, &frame, sizeof(struct can_frame));
-  std::cout << "bytes wroten: " << nbytes << std::endl;
-
-  //if you make it here you atleast wrote a full canframe to the BUS.
-  return true;
+    return send_command(longModeCmd);
 }
 
 
